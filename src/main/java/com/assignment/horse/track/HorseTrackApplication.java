@@ -22,6 +22,10 @@ public class HorseTrackApplication implements CommandLineRunner {
 
 	@Autowired
 	ExecuteCommandFromUserService executeCommandFromUserService;
+
+	@Autowired
+	PrintMessageToUserService printMessageToUserService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(HorseTrackApplication.class, args);
 	}
@@ -29,6 +33,8 @@ public class HorseTrackApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		dataLoaderService.initializeDataInDB();
+		printMessageToUserService.displayMoneyInventory();
+		printMessageToUserService.displayHorses();
 		Scanner sc = new Scanner(System.in);
 		String commandString = "";
 		while(!Arrays.asList("Q","q").contains(( commandString = sc.nextLine()))){
