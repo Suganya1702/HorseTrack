@@ -55,15 +55,20 @@ public class MoneyInventoryServiceImpl implements MoneyInventoryService{
         {
             if(winingAmt>=keyArray[i]) {
                 count[i] = winingAmt / keyArray[i];
+                if(moneyInventories.get(i).getInventory() ==0) {
+                    count[i] =  0;
+                }
+                if(count[i] > moneyInventories.get(i).getInventory() && moneyInventories.get(i).getInventory() !=0) {
+                    count[i] =  moneyInventories.get(i).getInventory();
+                }
             }
-            printMessageToUserService.printAmountMessages(keyArray[i],winingAmt / keyArray[i]);
-            winingAmt=winingAmt%keyArray[i];
+            winingAmt = winingAmt - count[i] * keyArray[i];
             moneyInventories.get(i).setInventory(moneyInventories.get(i).getInventory() - count[i] );
             moneyInventoryRepository.save(moneyInventories.get(i));
+            printMessageToUserService.printAmountMessages(keyArray[i],count[i]);
         }
         return moneyInventories;
     }
-
     /**
      * Restockes the money inventory
      *
