@@ -43,14 +43,14 @@ public class MoneyInventoryServiceImpl implements MoneyInventoryService{
     @Override
     public List<MoneyInventory> cashDispenser(int winingAmt, String horseName) {
         List<MoneyInventory> moneyInventories = fetchAllMoneyInventoryList();
-        printMessageToUserService.printPayoutMessages(horseName,winingAmt);
-        printMessageToUserService.printDispensingMessages();
+        int actualWiningAmt = winingAmt;
         Set<Integer> keySet = new HashSet<>();
         for (MoneyInventory money : moneyInventories)
             keySet.add(money.getDenomination());
         Integer[] keyArray = keySet.toArray(new Integer[keySet.size()]);
         Arrays.sort(keyArray, Collections.reverseOrder());
         Integer[] count = {0,0,0,0,0,0};
+        boolean isWiningAmtRemaining = false;
         for(int i=0;i<keyArray.length ;i++)
         {
             if(winingAmt>=keyArray[i]) {
@@ -63,9 +63,20 @@ public class MoneyInventoryServiceImpl implements MoneyInventoryService{
                 }
             }
             winingAmt = winingAmt - count[i] * keyArray[i];
-            moneyInventories.get(i).setInventory(moneyInventories.get(i).getInventory() - count[i] );
-            moneyInventoryRepository.save(moneyInventories.get(i));
-            printMessageToUserService.printAmountMessages(keyArray[i],count[i]);
+            if(i==keyArray.length-1 && winingAmt!=0 ){
+                isWiningAmtRemaining = true;
+            }
+        }
+        if(isWiningAmtRemaining){
+            printMessageToUserService.printMessages("Insufficient Denomination in Inventory: $"+actualWiningAmt);
+        }else {
+            printMessageToUserService.printPayoutMessages(horseName,actualWiningAmt);
+            printMessageToUserService.printDispensingMessages();
+            for (int j = 0; j < keyArray.length; j++) {
+                printMessageToUserService.printAmountMessages(keyArray[j], count[j]);
+                moneyInventories.get(j).setInventory(moneyInventories.get(j).getInventory() - count[j]);
+                moneyInventoryRepository.save(moneyInventories.get(j));
+            }
         }
         return moneyInventories;
     }
